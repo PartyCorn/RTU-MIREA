@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Визуализация корзинной сортировки</title>
+  <style>
+    :root{
+      --bg:#f8fafc;
+      --card:#ffffff;
+      --accent:#3b82f6;
+      --muted:#64748b;
+      --item-size:56px;
+      --gap:14px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{height:100vh;background:var(--bg);color:#111;font-family:Inter,system-ui,sans-serif;display:flex;flex-direction:column}
+    header{display:flex;align-items:center;justify-content:space-between;padding:20px 28px;background:var(--card);box-shadow:0 2px 6px rgba(0,0,0,0.06)}
+    h1{font-size:20px;font-weight:700;color:#111}
+    .controls{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+    .btn{background:var(--accent);color:#fff;border:none;padding:10px 16px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;transition:background 0.2s}
+    .btn:hover{background:#2563eb}
+    .btn:active{transform:translateY(1px)}
+    label{font-size:14px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:4px}
+    input[type=range]{width:120px}
+    .status{font-size:13px;color:#111;margin-top:2px}
+
+    main{flex:1;padding:24px;display:flex;flex-direction:column;gap:28px;overflow:auto}
+    .panel{background:var(--card);border-radius:14px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.06)}
+    .array-row,.buckets-row,.result-row{display:flex;gap:var(--gap);align-items:center;flex-wrap:wrap;min-height:var(--item-size)}
+
+    .item{width:var(--item-size);height:var(--item-size);border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;cursor:default;user-select:none;transition:transform 600ms cubic-bezier(.2,.9,.3,1), background 0.3s, width 0.3s, height 0.3s}
+    .item.highlight{background:#f59e0b;transform:scale(1.15)}
+    .item.sorting{background:#8b5cf6;box-shadow:0 0 10px rgba(139, 92, 246, 0.7);z-index:10}
+
+    .buckets{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;padding:12px}
+    .bucket{min-width:140px;min-height:140px;border-radius:12px;padding:10px;background:#f1f5f9;border:2px dashed #cbd5e1;display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;transform:scale(0.9);transition:all 600ms ease}
+    .bucket.show{opacity:1;transform:scale(1)}
+    .bucket.sorting{border:2px solid #f59e0b;box-shadow:0 0 15px rgba(245, 158, 11, 0.4);background:#fef3c7}
+    .bucket.sorted{border:2px solid #10b981;background:#d1fae5}
+    .bucket.empty-shake{animation:shake 0.5s ease}
+    .bucket .title{font-size:14px;font-weight:600;color:#111}
+    .bucket .slot-area{display:grid;grid-template-columns:repeat(3, var(--item-size));grid-auto-rows:var(--item-size);gap:8px;justify-content:center;padding:6px}
+
+    .result{display:flex;gap:10px;padding:12px;justify-content:center;align-items:center;flex-wrap:wrap}
+    footer{padding:16px;text-align:center;font-size:13px;color:var(--muted)}
+    
+    @keyframes shake{
+      0%,100%{transform:translateX(0)}
+      25%{transform:translateX(-5px)}
+      75%{transform:translateX(5px)}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Корзинная сортировка</h1>
+    <div class="controls">
+      <label>Элементы
+        <input id="size" type="range" min="5" max="30" value="12">
+        <div id="sizeStatus" class="status"></div>
+      </label>
+      <label>Корзинки
+        <input id="bcount" type="range" min="2" max="12" value="6">
+        <div id="bcountStatus" class="status"></div>
+      </label>
+      <label>Диапазон
+        <input id="minVal" type="range" min="0" max="1000" value="0" step="10">
+        <input id="maxVal" type="range" min="0" max="1000" value="200" step="10">
+        <div id="rangeStatus" class="status"></div>
+      </label>
+      <label>Скорость
+        <input id="speed" type="range" min="1" max="5" value="3">
+        <div id="speedStatus" class="status"></div>
+      </label>
+      <button id="gen" class="btn">Сгенерировать</button>
+      <button id="play" class="btn">Запустить</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2 style="font-size:16px;margin-bottom:12px">Исходный массив</h2>
+      <div id="array" class="array-row"></div>
+    </section>
+
+    <section class="panel">
+      <h2 style="font-size:16px;margin-bottom:12px">Корзинки</h2>
+      <div id="buckets" class="buckets"></div>
+    </section>
+
+    <section class="panel">
+      <h2 style="font-size:16px;margin-bottom:12px">Результат</h2>
+      <div id="result" class="result-row"></div>
+    </section>
+  </main>
+
+  <footer>Андрей Курилов. Интерактивная презентация. Элементы из массива попадают в корзинки, сортируются и собираются обратно.</footer>
+
+  <script>
+    const qs = s => document.querySelector(s);
+    const arrayRoot = qs('#array');
+    const bucketsRoot = qs('#buckets');
+    const resultRoot = qs('#result');
+    const genBtn = qs('#gen');
+    const playBtn = qs('#play');
+    const sizeInput = qs('#size');
+    const bcountInput = qs('#bcount');
+    const minInput = qs('#minVal');
+    const maxInput = qs('#maxVal');
+    const speedInput = qs('#speed');
+    const sizeStatus = qs('#sizeStatus');
+    const bcountStatus = qs('#bcountStatus');
+    const rangeStatus = qs('#rangeStatus');
+    const speedStatus = qs('#speedStatus');
+
+    let state = {arr:[],buckets:[],ranges:[],queue:[],playing:false};
+
+    function getSpeedMultiplier() {
+      // Обратная зависимость: больше значение = быстрее анимация
+      return 1 / (parseInt(speedInput.value, 10) * 0.5);
+    }
+
+    function updateStatus(){
+      sizeStatus.textContent = sizeInput.value;
+      bcountStatus.textContent = bcountInput.value;
+      rangeStatus.textContent = minInput.value+" – "+maxInput.value;
+      speedStatus.textContent = speedInput.value + "x";
+      minInput.max = maxInput.value;
+      maxInput.min = minInput.value;
+    }
+
+    function randInt(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+    function createItem(v){const el=document.createElement('div');el.className='item';el.textContent=v;el.dataset.val=v;return el;}
+
+    function generate(){
+      arrayRoot.innerHTML='';bucketsRoot.innerHTML='';resultRoot.innerHTML='';state.queue=[];state.playing=false;playBtn.textContent='Запустить';
+      const n=parseInt(sizeInput.value,10);const min=parseInt(minInput.value,10);const max=parseInt(maxInput.value,10);
+      state.arr=Array.from({length:n},()=>randInt(min,max));
+      state.arr.forEach(v=>arrayRoot.appendChild(createItem(v)));
+    }
+
+    function buildBuckets(count,min,max,done){
+      bucketsRoot.innerHTML='';state.buckets=[];state.ranges=[];
+      const range=Math.ceil((max-min+1)/count);
+      for(let i=0;i<count;i++){
+        const lo=min+i*range;const hi=Math.min(max,lo+range-1);
+        const bucket=document.createElement('div');bucket.className='bucket';
+        const title=document.createElement('div');title.className='title';title.textContent=`${lo}–${hi}`;
+        const area=document.createElement('div');area.className='slot-area';
+        bucket.appendChild(title);bucket.appendChild(area);bucketsRoot.appendChild(bucket);
+        state.buckets.push({element: bucket, area: area});
+        state.ranges.push([lo,hi]);
+        setTimeout(()=>{
+          bucket.classList.add('show');
+          if(i===count-1 && done) setTimeout(done,600 * getSpeedMultiplier());
+        },i*200 * getSpeedMultiplier());
+      }
+    }
+
+    function enqueue(fn){state.queue.push(fn);}
+    function processQueue(){
+      if(state.queue.length===0){
+        state.playing=false;
+        playBtn.textContent='Запустить';
+        return;
+      }
+      if(!state.playing) return;
+      const fn=state.queue.shift();
+      fn(()=>setTimeout(processQueue,500 * getSpeedMultiplier()));
+    }
+
+    function animateMove(el,target,onEnd){
+      const s=el.getBoundingClientRect();
+      const clone=el.cloneNode(true);
+      clone.style.position='fixed';
+      clone.style.left=s.left+'px';
+      clone.style.top=s.top+'px';
+      clone.style.width=s.width+'px';
+      clone.style.height=s.height+'px';
+      clone.style.zIndex=9999;
+      clone.style.transition=`transform ${700 * getSpeedMultiplier()}ms cubic-bezier(.2,.9,.3,1)`;
+      document.body.appendChild(clone);
+      el.style.visibility='hidden';
+      const ph=document.createElement('div');
+      ph.style.width=s.width+'px';
+      ph.style.height=s.height+'px';
+      target.appendChild(ph);
+      const e=ph.getBoundingClientRect();
+      const dx=e.left-s.left,dy=e.top-s.top;
+      requestAnimationFrame(()=>{
+        clone.style.transform=`translate(${dx}px,${dy}px)`
+      });
+      clone.addEventListener('transitionend',()=>{
+        ph.replaceWith(el);
+        el.style.visibility='visible';
+        document.body.removeChild(clone);
+        if(onEnd)onEnd();
+      },{once:true});
+    }
+
+    function bucketSortVisual(){
+      const arr=[...state.arr];
+      const min=Math.min(...arr),max=Math.max(...arr);
+      buildBuckets(parseInt(bcountInput.value,10),min,max,()=>{
+        // distribute
+        arr.forEach(v=>enqueue(done=>{
+          const el=[...arrayRoot.querySelectorAll('.item')].find(e=>e.dataset.val==v&&e.style.visibility!=='hidden');
+          const idx=state.ranges.findIndex(([lo,hi])=>v>=lo&&v<=hi);
+          animateMove(el,state.buckets[idx].area,done);
+        }));
+        
+        // sort inside each bucket with improved animations
+        state.buckets.forEach((bucketObj, bucketIndex) => enqueue(done => {
+          const area = bucketObj.area;
+          const bucketElement = bucketObj.element;
+          const elems = [...area.querySelectorAll('.item')];
+          
+          // Подсвечиваем корзинку, которую сортируем
+          bucketElement.classList.add('sorting');
+          
+          if(elems.length <= 1){
+            // Если нечего сортировать - анимация тряски
+            if(elems.length === 0) {
+              bucketElement.classList.add('empty-shake');
+              setTimeout(() => {
+                bucketElement.classList.remove('empty-shake');
+                bucketElement.classList.remove('sorting');
+                bucketElement.classList.add('sorted');
+                done();
+              }, 500 * getSpeedMultiplier());
+            } else {
+              // Один элемент - просто подсвечиваем как отсортированную
+              setTimeout(() => {
+                bucketElement.classList.remove('sorting');
+                bucketElement.classList.add('sorted');
+                done();
+              }, 500 * getSpeedMultiplier());
+            }
+            return;
+          }
+          
+          let vals = elems.map(e => +e.dataset.val);
+          let i = 1;
+          
+          function step(){
+            if(i >= vals.length){
+              // Завершаем сортировку этой корзинки
+              bucketElement.classList.remove('sorting');
+              bucketElement.classList.add('sorted');
+              done();
+              return;
+            }
+            
+            let j = i;
+            const currentElem = elems[j];
+            
+            // Выделяем элемент, который сортируем
+            currentElem.classList.add('sorting');
+            
+            // Пауза перед началом перемещения
+            setTimeout(() => {
+              function inner(){
+                if(j > 0 && vals[j] < vals[j-1]){
+                  // Подсвечиваем элемент, с которым сравниваем
+                  elems[j-1].classList.add('highlight');
+                  
+                  // Меняем значения в массиве
+                  [vals[j], vals[j-1]] = [vals[j-1], vals[j]];
+                  
+                  // Меняем элементы местами в DOM
+                  area.insertBefore(elems[j], elems[j-1]);
+                  [elems[j], elems[j-1]] = [elems[j-1], elems[j]];
+                  
+                  // Убираем подсветку и продолжаем
+                  setTimeout(() => {
+                    elems[j-1].classList.remove('highlight');
+                    j--;
+                    setTimeout(inner, 600 * getSpeedMultiplier());
+                  }, 400 * getSpeedMultiplier());
+                } else {
+                  // Завершаем проход для этого элемента
+                  currentElem.classList.remove('sorting');
+                  elems.forEach(e => e.classList.remove('highlight'));
+                  i++;
+                  setTimeout(step, 600 * getSpeedMultiplier());
+                }
+              }
+              inner();
+            }, 500 * getSpeedMultiplier()); // Пауза перед началом перемещения
+          }
+          step();
+        }));
+        
+        // concatenate
+        state.buckets.forEach(bucketObj => enqueue(done => {
+          const area = bucketObj.area;
+          const items = [...area.querySelectorAll('.item')];
+          let i = 0;
+          function next(){
+            if(i >= items.length){
+              done();
+              return;
+            }
+            animateMove(items[i], resultRoot, () => {
+              i++;
+              next();
+            });
+          }
+          next();
+        }));
+      });
+    }
+
+    genBtn.addEventListener('click',generate);
+    playBtn.addEventListener('click',()=>{
+      if(state.playing){
+        state.playing=false;
+        playBtn.textContent='Запустить';
+        return;
+      }
+      if(state.queue.length===0) bucketSortVisual();
+      state.playing=true;
+      playBtn.textContent='Пауза';
+      processQueue();
+    });
+    sizeInput.addEventListener('input',updateStatus);
+    bcountInput.addEventListener('input',updateStatus);
+    minInput.addEventListener('input',updateStatus);
+    maxInput.addEventListener('input',updateStatus);
+    speedInput.addEventListener('input',updateStatus);
+
+    updateStatus();
+    generate();
+  </script>
+</body>
+</html>

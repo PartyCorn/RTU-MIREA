@@ -1,2 +1,56 @@
-# RTU MIREA
-Полный архив готовых работ по IT дисциплинам для студентов РТУ МИРЭА по направлению 09.03.04 «Программная инженерия» (профиль: «Разработка программных продуктов и проектирование информационных систем»). Внутри собраны актуальные решения, исходный код и отчеты по всем предметам курса.
+<div align="center">
+
+# 🎓 RTU MIREA
+
+<img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&weight=600&size=24&pause=1200&color=58A6FF&center=true&vCenter=true&width=900&lines=РТУ+МИРЭА+%7C+09.03.04;Сборник+готовых+решений" />
+
+<br>
+
+![Stars](https://img.shields.io/github/stars/PartyCorn/RTU-MIREA?style=for-the-badge&color=7B68EE)
+![Repo Size](https://img.shields.io/github/repo-size/PartyCorn/RTU-MIREA?style=for-the-badge&color=5D4DFF)
+![Last Commit](https://img.shields.io/github/last-commit/PartyCorn/RTU-MIREA?style=for-the-badge&color=4C6EF5)
+
+</div>
+
+---
+
+<div align="center">
+
+![profile_card.png](images/profile_card.png)
+
+</div>
+
+## 📂 Структура репозитория
+
+- [1 курс](1%20курс)
+  - [1 семестр](1%20курс/1%20семестр)
+    - [Информатика](1%20курс/1%20семестр/Информатика)
+  - [2 семестр](1%20курс/2%20семестр)
+    - [Системы искуственного интеллекта и большие данные](1%20курс/2%20семестр/СИИиБД)
+      - 6 рабочих тетрадей
+    - Ознакомительная практика
+      - Проект [AllTrack](https://github.com/PartyCorn/AllTrack)
+    - [Объектно-ориентированное программирование](1%20курс/2%20семестр/ООП)
+      - [Упражнения](1%20курс/2%20семестр/ООП/Упражнения) (4 блока по 3 задачи)
+      - [Курсовые версии 1-4](1%20курс/2%20семестр/ООП/Курсовые) (сдано Путуридзе З. Ш.)
+    - [Структуры и алгоритмы обработки данных](1%20курс/2%20семестр/СиАОД)
+      - 3 полностью выполненных блока
+
+## ⚡ Технологии
+
+<div align="center"> <img src="https://skillicons.dev/icons?i=cpp,python,github,vscode,visualstudio" /> </div>
+
+## ⭐ Поддержка
+
+Если репозиторий оказался полезен:
+
+* поставь ⭐
+* сохрани себе
+* используй для подготовки
+
+<div align="center">
+
+## РТУ МИРЭА • 2026 • Курилов Андрей
+
+</div>
+
