@@ -33,10 +33,13 @@
     - Ознакомительная практика (проект [AllTrack](https://github.com/PartyCorn/AllTrack))
     - [Структуры и алгоритмы обработки данных](1%20курс/2%20семестр/СиАОД) (1.1 - 3.2)
     - [Системы искуственного интеллекта и большие данные](1%20курс/2%20семестр/СИИиБД) (6 рабочих тетрадей)
+- [2 курс](2%20курс)
+  - [3 семестр](1%20курс/3%20семестр)
+    - [Конфигурационное управление](2%20курс/3%20семестр/Конфигурационное%20управление)
 
 ## ⚡ Технологии
 
-<div align="center"> <img src="https://skillicons.dev/icons?i=cpp,python,github,vscode,visualstudio,anaconda" /> </div>
+<div align="center"> <img src="https://skillicons.dev/icons?i=cpp,python,github,vscode,visualstudio,anaconda,linux,ubuntu,docker" /> </div>
 
 ## ⭐ Поддержка
 
