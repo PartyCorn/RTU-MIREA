@@ -45,7 +45,7 @@
 
 ## ⚡ Технологии
 
-<div align="center"> <img src="https://skillicons.dev/icons?i=cpp,python,github,vscode,visualstudio,anaconda,linux,ubuntu,docker" /> </div>
+<div align="center"> <img src="https://skillicons.dev/icons?i=cpp,python,html,css,js,mysql,vscode,visualstudio,anaconda,github,linux,ubuntu,docker" /> </div>
 
 ## ⭐ Поддержка
 

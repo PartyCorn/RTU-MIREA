@@ -7,4 +7,4 @@
 
 # Практическое задание №1. Вариант 15
 
-Доступен в репозитории [PartyCorn/vfs-shell-emulator](https://github.com/PartyCorn/vfs-shell-emulator).
+Доступен в репозитории [partycorn-edu/vfs-shell-emulator](https://github.com/partycorn-edu/vfs-shell-emulator).
