@@ -8,3 +8,7 @@
 # Практическое задание №1. Вариант 15
 
 Доступен в репозитории [partycorn-edu/vfs-shell-emulator](https://github.com/partycorn-edu/vfs-shell-emulator).
+
+# Практическое задание №2. Вариант 15
+
+Доступен в репозитории [partycorn-edu/my-npm-depgraph](https://github.com/partycorn-edu/my-npm-depgraph).
